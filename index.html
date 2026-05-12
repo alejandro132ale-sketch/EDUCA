@@ -1,0 +1,1881 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>EDUCA - Quiz Interactivo</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+
+  <style>
+    :root {
+      --accent: #0a84ff;
+      --accent-hover: #0066cc;
+      --success: #32d74b;
+      --error: #ff453a;
+      --warning: #ff9f0a;
+      --bg-color: #000000;
+
+      /* Dark premium glass */
+      --glass-bg: rgba(20, 20, 25, 0.6);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --text-main: #ffffff;
+      --text-muted: #98989d;
+      --shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+      --glow: inset 0 0 20px rgba(255, 255, 255, 0.03), 0 0 15px rgba(10, 132, 255, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+      color: var(--text-main);
+      background-color: var(--bg-color);
+      min-height: 100vh;
+      overflow-x: hidden;
+      margin: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Fondo negro profundo con brillos sutiles en las esquinas */
+    .bg-lights {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(10, 132, 255, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 100% 100%, rgba(50, 215, 75, 0.1) 0%, transparent 40%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    /* GLASS 3D WIDGETS */
+    .glass-3d {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      box-shadow: var(--shadow), var(--glow);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* BOTONES */
+    .btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 16px 24px;
+      border-radius: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+      width: 100%;
+      text-align: left;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      border: none;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(10, 132, 255, 0.4);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    /* ESTRUCTURA SPA */
+    .screen {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    /* TOP BAR & RELOJ */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding: 12px 20px;
+      border-radius: 50px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .topbar-right {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .user-greeting {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .user-greeting span {
+      color: #fff;
+    }
+
+    /* RELOJ 3D GOTA DE AGUA */
+    .water-clock {
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 1px;
+      background: rgba(255, 255, 255, 0.1);
+      box-shadow:
+        inset 1px 1px 3px rgba(255, 255, 255, 0.2),
+        0 4px 10px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+
+    .settings-btn {
+      font-size: 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #fff;
+      transition: transform 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .settings-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* HOME SCREEN (CENTRO) */
+    #home-screen {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+    }
+
+    .title-huge {
+      font-size: clamp(60px, 15vw, 130px);
+      font-weight: 900;
+      letter-spacing: -3px;
+      margin-bottom: 5px;
+    }
+
+    .title-letter {
+      display: inline-block;
+      animation: letterFloat 2.5s ease-in-out infinite alternate;
+      transition: transform 0.3s ease;
+      cursor: default;
+    }
+
+    .title-letter:hover {
+      transform: scale(1.2) rotate(-8deg) !important;
+    }
+
+    .title-letter:nth-child(1) {
+      color: #ff453a;
+      text-shadow: 0 0 30px rgba(255, 69, 58, 0.7), 0 0 60px rgba(255, 69, 58, 0.3);
+      animation-delay: 0s;
+    }
+
+    .title-letter:nth-child(2) {
+      color: #ff9f0a;
+      text-shadow: 0 0 30px rgba(255, 159, 10, 0.7), 0 0 60px rgba(255, 159, 10, 0.3);
+      animation-delay: 0.15s;
+    }
+
+    .title-letter:nth-child(3) {
+      color: #32d74b;
+      text-shadow: 0 0 30px rgba(50, 215, 75, 0.7), 0 0 60px rgba(50, 215, 75, 0.3);
+      animation-delay: 0.3s;
+    }
+
+    .title-letter:nth-child(4) {
+      color: #0a84ff;
+      text-shadow: 0 0 30px rgba(10, 132, 255, 0.7), 0 0 60px rgba(10, 132, 255, 0.3);
+      animation-delay: 0.45s;
+    }
+
+    .title-letter:nth-child(5) {
+      color: #bf5af2;
+      text-shadow: 0 0 30px rgba(191, 90, 242, 0.7), 0 0 60px rgba(191, 90, 242, 0.3);
+      animation-delay: 0.6s;
+    }
+
+    @keyframes letterFloat {
+      0% {
+        transform: translateY(0px);
+        filter: brightness(1);
+      }
+
+      100% {
+        transform: translateY(-8px);
+        filter: brightness(1.3);
+      }
+    }
+
+    .slogan {
+      font-size: clamp(16px, 4vw, 20px);
+      font-weight: 500;
+      margin-bottom: 50px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+
+    .login-circle-container {
+      position: relative;
+      margin-bottom: 30px;
+    }
+
+    .avatar-circle {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.1), 0 0 20px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+    }
+
+    .login-box {
+      max-width: 400px;
+      width: 100%;
+      padding: 40px 30px;
+      text-align: center;
+      position: relative;
+    }
+
+    .input-login {
+      width: 100%;
+      padding: 18px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(0, 0, 0, 0.5);
+      font-size: 16px;
+      color: #fff;
+      margin-bottom: 25px;
+      outline: none;
+      text-align: center;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .input-login::placeholder {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .input-login:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 15px rgba(10, 132, 255, 0.3);
+    }
+
+    /* PATH SCREEN */
+    #path-screen {
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .learning-tip {
+      background: rgba(10, 132, 255, 0.1);
+      border-left: 4px solid var(--accent);
+      padding: 15px 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.9);
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .level-card {
+      padding: 25px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .level-card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 10px 30px rgba(10, 132, 255, 0.15);
+      border-color: rgba(10, 132, 255, 0.4);
+    }
+
+    .level-icon {
+      font-size: 40px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 10px;
+      border-radius: 16px;
+    }
+
+    .level-info h3 {
+      font-size: 22px;
+      margin-bottom: 5px;
+      font-weight: 800;
+    }
+
+    /* DASHBOARD METRICS IN PATH */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    @media(min-width: 600px) {
+      .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 15px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .stat-val {
+      font-size: 28px;
+      font-weight: 900;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .warning-box {
+      margin-top: 15px;
+      padding: 15px;
+      border-radius: 16px;
+      background: rgba(255, 69, 58, 0.1);
+      border: 1px solid rgba(255, 69, 58, 0.3);
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      font-size: 14px;
+    }
+
+    /* QUIZ SCREEN */
+    #quiz-screen {
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .quiz-container {
+      padding: 35px 25px;
+    }
+
+    .streak-badge {
+      background: linear-gradient(135deg, #ff9f0a, #ff453a);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(255, 69, 58, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .problem-context {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-bottom: 25px;
+      font-style: italic;
+      border-left: 3px solid var(--accent);
+      padding-left: 15px;
+      font-weight: 500;
+    }
+
+    .question-title {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 30px;
+      line-height: 1.4;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 768px) {
+      .options-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+    }
+
+    .option-btn {
+      font-size: 15px;
+      line-height: 1.5;
+      padding: 18px;
+      border-radius: 16px;
+      font-weight: 600;
+    }
+
+    .option-btn.correct {
+      background: rgba(50, 215, 75, 0.2) !important;
+      color: var(--success) !important;
+      border-color: var(--success) !important;
+      box-shadow: 0 0 15px rgba(50, 215, 75, 0.2) !important;
+    }
+
+    .option-btn.wrong {
+      background: rgba(255, 69, 58, 0.2) !important;
+      color: var(--error) !important;
+      border-color: var(--error) !important;
+      opacity: 0.6;
+    }
+
+    .explanation-box {
+      margin-top: 25px;
+      padding: 20px;
+      border-radius: 16px;
+      background: rgba(10, 132, 255, 0.1);
+      border: 1px solid rgba(10, 132, 255, 0.3);
+      display: none;
+      animation: fadeIn 0.4s;
+      font-size: 15px;
+      font-weight: 500;
+      line-height: 1.6;
+    }
+
+    /* QUIENES SOMOS SCREEN */
+    #info-screen {
+      max-width: 600px;
+      margin: 0 auto;
+      width: 100%;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .profile-img {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--glass-border);
+      margin: 0 auto 25px;
+    }
+
+    .info-card {
+      padding: 35px 25px;
+      text-align: left;
+    }
+
+    /* SETTINGS MODAL */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      width: 90%;
+      max-width: 400px;
+      padding: 30px;
+      text-align: center;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .timer-bar {
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.1);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .timer-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 3px;
+      transition: width 0.3s linear;
+    }
+
+    .timer-fill.danger {
+      background: var(--error);
+    }
+
+    .lives-display {
+      display: flex;
+      gap: 4px;
+      font-size: 20px;
+    }
+
+    .hint-btn {
+      background: rgba(255, 159, 10, 0.15);
+      border: 1px solid rgba(255, 159, 10, 0.3);
+      color: var(--warning);
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .hint-btn:hover {
+      background: rgba(255, 159, 10, 0.3);
+    }
+
+    .hint-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .badge-pill {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      margin: 4px;
+      background: rgba(191, 90, 242, 0.2);
+      border: 1px solid rgba(191, 90, 242, 0.4);
+      color: #bf5af2;
+    }
+
+    .badge-pill.new {
+      animation: fadeIn 0.5s;
+    }
+
+    .lb-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .lb-row:first-child {
+      background: rgba(255, 159, 10, 0.15);
+      border-color: rgba(255, 159, 10, 0.3);
+    }
+
+    /* ===== ANALYTICS SCREEN ===== */
+    #analytics-screen {
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .analytics-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .analytics-header h2 {
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      margin-bottom: 5px;
+    }
+
+    .analytics-header p {
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    @media(max-width:600px) {
+      .analytics-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .metric-card {
+      padding: 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric-card .metric-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .metric-card .metric-value {
+      font-size: 36px;
+      font-weight: 900;
+      margin-bottom: 4px;
+    }
+
+    .metric-card .metric-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+    }
+
+    .metric-card .metric-bar {
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.1);
+      margin-top: 12px;
+      overflow: hidden;
+    }
+
+    .metric-card .metric-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 1s ease;
+    }
+
+    .chart-card {
+      padding: 25px;
+      margin-bottom: 20px;
+    }
+
+    .chart-card h3 {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .level-breakdown {
+      margin-bottom: 20px;
+    }
+
+    .level-row {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .level-row:last-child {
+      border-bottom: none;
+    }
+
+    .level-row .lv-icon {
+      font-size: 24px;
+      width: 40px;
+      text-align: center;
+    }
+
+    .level-row .lv-info {
+      flex: 1;
+    }
+
+    .level-row .lv-name {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .level-row .lv-bar {
+      height: 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .level-row .lv-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 1.2s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    .level-row .lv-pct {
+      font-size: 14px;
+      font-weight: 800;
+      min-width: 45px;
+      text-align: right;
+    }
+
+    .level-row .lv-status {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .radial-container {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+
+    .radial-item {
+      text-align: center;
+    }
+
+    .radial-item svg {
+      width: 90px;
+      height: 90px;
+      transform: rotate(-90deg);
+    }
+
+    .radial-item circle {
+      fill: none;
+      stroke-width: 8;
+      stroke-linecap: round;
+    }
+
+    .radial-item .radial-bg {
+      stroke: rgba(255, 255, 255, 0.08);
+    }
+
+    .radial-item .radial-fg {
+      transition: stroke-dashoffset 1.5s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    .radial-item .radial-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-top: 8px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
+    .radial-item .radial-val {
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .improvement-list {
+      list-style: none;
+    }
+
+    .improvement-item {
+      display: flex;
+      gap: 15px;
+      align-items: flex-start;
+      padding: 15px;
+      border-radius: 14px;
+      background: rgba(255, 69, 58, 0.06);
+      border: 1px solid rgba(255, 69, 58, 0.15);
+      margin-bottom: 10px;
+      animation: fadeIn .5s;
+    }
+
+    .improvement-item .imp-icon {
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .improvement-item .imp-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .improvement-item .imp-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .improvement-item.good {
+      background: rgba(50, 215, 75, 0.06);
+      border-color: rgba(50, 215, 75, 0.15);
+    }
+
+    .btn-pdf {
+      background: linear-gradient(135deg, #bf5af2, #0a84ff);
+      border: none;
+      color: #fff;
+      padding: 18px 30px;
+      border-radius: 16px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 6px 25px rgba(191, 90, 242, 0.3);
+      transition: all .3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-pdf:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 35px rgba(191, 90, 242, 0.5);
+    }
+
+    .btn-pdf:active {
+      transform: scale(.97);
+    }
+
+    @keyframes countUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+</head>
+
+<body>
+
+  <div class="bg-lights"></div>
+
+  <!-- HOME SCREEN -->
+  <div id="home-screen" class="screen">
+    <h1 class="title-huge"><span class="title-letter">E</span><span class="title-letter">D</span><span
+        class="title-letter">U</span><span class="title-letter">C</span><span class="title-letter">A</span></h1>
+    <div class="slogan">El conocimiento técnico, todo en uno solo.</div>
+
+    <div class="login-box glass-3d">
+      <div class="login-circle-container">
+        <div class="avatar-circle">👤</div>
+      </div>
+      <input type="text" id="username-input" class="input-login" placeholder="Ingresa tu nombre..." autocomplete="off">
+      <button class="btn btn-primary" id="btn-start"
+        style="font-size: 16px; padding: 18px; border-radius: 16px;">Iniciar Aventura</button>
+    </div>
+  </div>
+
+  <!-- MODE SCREEN -->
+  <div id="mode-screen" class="screen hidden" style="justify-content:center;align-items:center;">
+    <h2 style="font-size:32px;font-weight:900;margin-bottom:10px;text-align:center;">Elige tu Modo</h2>
+    <p style="color:var(--text-muted);margin-bottom:40px;text-align:center;">¿Cómo quieres aprender hoy?</p>
+    <div style="max-width:500px;width:100%;display:flex;flex-direction:column;gap:15px;">
+      <div class="level-card glass-3d" onclick="selectMode('practice')" style="cursor:pointer">
+        <div class="level-icon">📚</div>
+        <div class="level-info">
+          <h3>Modo Práctica</h3>
+          <p style="color:var(--text-muted);font-size:13px">Sin vidas, sin límite de tiempo. Pistas disponibles.</p>
+        </div>
+      </div>
+      <div class="level-card glass-3d" onclick="selectMode('challenge')" style="cursor:pointer">
+        <div class="level-icon">⚔️</div>
+        <div class="level-info">
+          <h3>Modo Desafío</h3>
+          <p style="color:var(--text-muted);font-size:13px">3 vidas, 15s por pregunta. ¡Demuestra lo que sabes!</p>
+        </div>
+      </div>
+      <div class="level-card glass-3d" onclick="selectMode('marathon')" style="cursor:pointer">
+        <div class="level-icon">🏃</div>
+        <div class="level-info">
+          <h3>Modo Maratón</h3>
+          <p style="color:var(--text-muted);font-size:13px">Preguntas infinitas. 2 fallos seguidos = fin.</p>
+        </div>
+      </div>
+    </div>
+    <button class="btn" style="max-width:500px;margin-top:20px;text-align:center" onclick="switchScreen('path')">←
+      Volver a Ruta</button>
+  </div>
+
+  <!-- INFO SCREEN -->
+  <div id="info-screen" class="screen hidden">
+    <div class="topbar">
+      <button class="btn" style="padding: 10px 15px; width: auto; font-size: 14px;" onclick="goBackFromInfo()">←
+        Volver</button>
+    </div>
+
+    <img src="WhatsApp Image 2026-05-11 at 11.36.41 PM.jpeg" alt="Jorge Alejandro" class="profile-img"
+      onerror="this.src='https://ui-avatars.com/api/?name=Jorge+Alejandro&background=007aff&color=fff&size=150'">
+
+    <div class="info-card glass-3d">
+      <h2 style="margin-bottom: 15px; font-size: 24px; font-weight: 800;">El Origen</h2>
+      <p style="font-size: 15px; margin-bottom: 20px; line-height: 1.6; color: var(--text-muted);">EDUCA surge de la
+        necesidad de comprender de manera sencilla y estructurada los problemas comunes del servicio técnico de PCs.</p>
+
+      <h3 style="margin-bottom: 10px; font-size: 18px; font-weight: 700;">El Problema</h3>
+      <p style="font-size: 15px; line-height: 1.6; margin-bottom: 30px; color: var(--text-muted);">Muchos usuarios se
+        enfrentan a fallas de hardware y software sin saber por dónde empezar. EDUCA gamifica el aprendizaje para
+        hacerlo intuitivo.</p>
+
+      <div style="text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+        <p style="font-weight: 800; font-size: 16px; margin-bottom: 5px;">© EDUCA</p>
+        <p style="font-size: 13px; color: var(--text-muted);">Jorge Alejandro Santana Gomez</p>
+        <p style="font-size: 11px; opacity: 0.5; margin-top: 5px;">EDUCA</p>
+
+        <!-- Social Links -->
+        <div style="display:flex;justify-content:center;gap:15px;margin-top:20px;">
+          <a href="https://www.facebook.com/profile.php?id=61589782614506" target="_blank" rel="noopener noreferrer"
+            style="display:flex;align-items:center;gap:8px;padding:12px 20px;border-radius:14px;background:rgba(24,119,242,0.15);border:1px solid rgba(24,119,242,0.3);color:#1877F2;text-decoration:none;font-size:14px;font-weight:700;transition:all 0.2s;"
+            onmouseover="this.style.background='rgba(24,119,242,0.3)';this.style.transform='translateY(-2px)'"
+            onmouseout="this.style.background='rgba(24,119,242,0.15)';this.style.transform='translateY(0)'">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877F2">
+              <path
+                d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+            </svg>
+            Facebook
+          </a>
+          <a href="https://www.instagram.com/educa._.mx?igsh=N3puZ3lvMXByN2g4" target="_blank" rel="noopener noreferrer"
+            style="display:flex;align-items:center;gap:8px;padding:12px 20px;border-radius:14px;background:rgba(225,48,108,0.15);border:1px solid rgba(225,48,108,0.3);color:#E1306C;text-decoration:none;font-size:14px;font-weight:700;transition:all 0.2s;"
+            onmouseover="this.style.background='rgba(225,48,108,0.3)';this.style.transform='translateY(-2px)'"
+            onmouseout="this.style.background='rgba(225,48,108,0.15)';this.style.transform='translateY(0)'">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#E1306C">
+              <path
+                d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
+            </svg>
+            Instagram
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PATH SCREEN -->
+  <div id="path-screen" class="screen hidden">
+    <div class="topbar">
+      <div class="user-greeting">HOLA <span id="user-display"></span></div>
+      <div class="topbar-right">
+        <div class="water-clock">12:00 PM</div>
+        <button class="settings-btn" title="Quiénes Somos" onclick="switchScreen('info')">ℹ️</button>
+        <button class="settings-btn" title="Ajustes" onclick="openSettings()">⚙️</button>
+      </div>
+    </div>
+
+    <!-- Tip del Dia -->
+    <div class="learning-tip glass-3d" id="learning-tip">
+      <div style="font-size: 24px;">💡</div>
+      <div><strong>Sabías que...</strong> El mantenimiento preventivo evita hasta el 80% de los fallos catastróficos en
+        hardware.</div>
+    </div>
+
+    <div style="text-align: center; margin-bottom: 30px;">
+      <h2 style="font-size: 32px; font-weight: 900; margin-bottom: 5px; letter-spacing: -1px;">Tu Ruta</h2>
+      <p style="font-size: 15px; color: var(--text-muted);">Selecciona un nivel para aprender.</p>
+    </div>
+
+    <div id="levels-container">
+      <!-- Niveles inyectados por JS -->
+    </div>
+
+    <!-- CONTENEDOR DE ESTADISTICAS Y ADVERTENCIAS -->
+    <div id="stats-container" class="glass-3d hidden" style="padding: 25px; margin-top: 30px;">
+      <h3 style="font-size: 20px; margin-bottom: 20px; font-weight: 800;">Métricas de Rendimiento</h3>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-val" id="stat-racha" style="color: var(--warning);">0</div>
+          <div class="stat-label">Racha Actual</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="stat-max-racha" style="color: #fff;">0</div>
+          <div class="stat-label">Mejor Racha</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="stat-correct" style="color: var(--success);">0</div>
+          <div class="stat-label">Aciertos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="stat-wrong" style="color: var(--error);">0</div>
+          <div class="stat-label">Errores</div>
+        </div>
+      </div>
+
+      <div id="warning-section"></div>
+      <button class="btn-pdf" style="margin-top:20px;font-size:14px;padding:14px;" onclick="openAnalytics()">📊 Ver
+        Análisis Completo y Descargar PDF</button>
+    </div>
+
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div id="quiz-screen" class="screen hidden">
+    <div class="topbar">
+      <button class="btn" style="padding: 10px 15px; width: auto; font-size: 14px;" onclick="goBackToPath()">←
+        Salir</button>
+      <div class="topbar-right">
+        <div class="streak-badge hidden" id="quiz-streak">🔥 Racha: 0</div>
+        <button class="settings-btn" title="Quiénes Somos" onclick="switchScreen('info')">ℹ️</button>
+        <button class="settings-btn" title="Ajustes" onclick="openSettings()">⚙️</button>
+      </div>
+    </div>
+
+    <div class="quiz-container glass-3d" id="quiz-container">
+      <div
+        style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:15px;">
+        <span style="font-weight:800;font-size:18px;color:var(--accent);" id="quiz-level-title">Nivel</span>
+        <div style="display:flex;gap:12px;align-items:center;">
+          <div class="lives-display hidden" id="quiz-lives"></div>
+          <span style="font-weight:800;color:var(--accent);" id="quiz-points">0 pts</span>
+          <span
+            style="font-size:14px;font-weight:700;background:rgba(255,255,255,0.05);padding:6px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);"
+            id="quiz-progress">1/5</span>
+        </div>
+      </div>
+      <div class="timer-bar hidden" id="timer-bar">
+        <div class="timer-fill" id="timer-fill" style="width:100%"></div>
+      </div>
+
+      <div class="problem-context" id="q-problem">Problema contexto...</div>
+      <div class="question-title" id="q-title">¿Pregunta principal?</div>
+
+      <div class="options-grid" id="q-options"></div>
+      <div id="hint-section" class="hidden" style="margin-top:15px;"><button class="hint-btn" id="hint-btn"
+          onclick="useHint()">💡 Pista (-5 pts)</button>
+        <p id="hint-text" style="margin-top:10px;color:var(--warning);font-size:14px;font-style:italic;"></p>
+      </div>
+
+      <div class="explanation-box" id="q-explanation">Explicacion...</div>
+
+      <button class="btn btn-primary hidden" id="btn-next-question"
+        style="margin-top: 30px; font-size: 16px; padding: 18px;" onclick="nextQuestion()">Siguiente Pregunta →</button>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div id="results-screen" class="screen hidden" style="justify-content:center;align-items:center;">
+    <div class="glass-3d" style="max-width:500px;width:100%;padding:40px;text-align:center;">
+      <div id="results-icon" style="font-size:60px;margin-bottom:15px;">🏆</div>
+      <h2 id="results-title" style="font-size:28px;font-weight:900;margin-bottom:10px;">¡Bien hecho!</h2>
+      <p id="results-subtitle" style="color:var(--text-muted);margin-bottom:25px;"></p>
+      <div class="stats-grid" style="margin-bottom:25px;">
+        <div class="stat-card">
+          <div class="stat-val" id="res-score" style="color:var(--accent);">0</div>
+          <div class="stat-label">Puntos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="res-correct" style="color:var(--success);">0</div>
+          <div class="stat-label">Aciertos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="res-wrong" style="color:var(--error);">0</div>
+          <div class="stat-label">Errores</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="res-streak" style="color:var(--warning);">0</div>
+          <div class="stat-label">Racha Max</div>
+        </div>
+      </div>
+      <div id="results-badges" style="margin-bottom:20px;"></div>
+      <button class="btn btn-primary" style="margin-bottom:10px;" onclick="shareResult()">📋 Compartir
+        Resultado</button>
+      <button class="btn" style="margin-bottom:10px;" onclick="startFlashcards()">🔄 Repasar Fallos</button>
+      <button class="btn" onclick="goBackToPath()">← Volver</button>
+    </div>
+  </div>
+
+  <!-- FLASHCARDS SCREEN -->
+  <div id="flashcards-screen" class="screen hidden" style="justify-content:center;align-items:center;">
+    <div class="topbar" style="max-width:600px;width:100%;"><button class="btn"
+        style="padding:10px 15px;width:auto;font-size:14px;" onclick="goBackToPath()">← Volver</button>
+      <div class="topbar-right"><span id="fc-counter" style="color:var(--text-muted);font-weight:700;">1/5</span></div>
+    </div>
+    <div id="flashcard" class="glass-3d"
+      style="max-width:500px;width:100%;min-height:250px;padding:40px;text-align:center;cursor:pointer;transition:transform 0.6s;"
+      onclick="flipCard()">
+      <div id="fc-front">
+        <p style="color:var(--text-muted);font-size:13px;margin-bottom:15px;">PREGUNTA</p>
+        <h3 id="fc-question" style="font-size:20px;font-weight:700;line-height:1.5;"></h3>
+      </div>
+      <div id="fc-back" class="hidden">
+        <p style="color:var(--success);font-size:13px;margin-bottom:15px;">RESPUESTA</p>
+        <h3 id="fc-answer" style="font-size:20px;font-weight:700;line-height:1.5;color:var(--success);"></h3>
+      </div>
+    </div>
+    <div style="display:flex;gap:15px;margin-top:20px;max-width:500px;width:100%;">
+      <button class="btn" style="text-align:center;" onclick="prevFlashcard()">← Anterior</button>
+      <button class="btn btn-primary" style="text-align:center;" onclick="nextFlashcard()">Siguiente →</button>
+    </div>
+  </div>
+
+  <!-- ANALYTICS SCREEN -->
+  <div id="analytics-screen" class="screen hidden">
+    <div class="topbar">
+      <button class="btn" style="padding:10px 15px;width:auto;font-size:14px;" onclick="goBackToPath()">←
+        Volver</button>
+      <div class="topbar-right">
+        <div class="water-clock">12:00 PM</div>
+      </div>
+    </div>
+
+    <div class="analytics-header">
+      <h2>📊 Tu Análisis</h2>
+      <p>Métricas detalladas de tu rendimiento</p>
+    </div>
+
+    <!-- TOP METRICS -->
+    <div class="analytics-grid" id="analytics-top-metrics"></div>
+
+    <!-- RADIAL PROGRESS -->
+    <div class="chart-card glass-3d">
+      <h3>🎯 Resumen General</h3>
+      <div class="radial-container" id="radial-container"></div>
+    </div>
+
+    <!-- BAR CHART -->
+    <div class="chart-card glass-3d">
+      <h3>📈 Rendimiento por Nivel</h3>
+      <div style="position:relative;height:260px;width:100%;">
+        <canvas id="levelBarChart"></canvas>
+      </div>
+    </div>
+
+    <!-- LEVEL BREAKDOWN -->
+    <div class="chart-card glass-3d">
+      <h3>🗂️ Desglose por Nivel</h3>
+      <div class="level-breakdown" id="level-breakdown"></div>
+    </div>
+
+    <!-- RADAR CHART -->
+    <div class="chart-card glass-3d">
+      <h3>🕸️ Mapa de Habilidades</h3>
+      <div style="position:relative;height:300px;width:100%;">
+        <canvas id="skillRadarChart"></canvas>
+      </div>
+    </div>
+
+    <!-- IMPROVEMENT AREAS -->
+    <div class="chart-card glass-3d">
+      <h3>🔍 Áreas de Mejora</h3>
+      <ul class="improvement-list" id="improvement-list"></ul>
+    </div>
+
+    <!-- PDF DOWNLOAD -->
+    <button class="btn-pdf" onclick="downloadPDF()">
+      📄 Descargar Reporte PDF
+    </button>
+    <p style="text-align:center;color:var(--text-muted);font-size:12px;margin-top:10px;margin-bottom:30px;">Incluye
+      recomendaciones personalizadas de mejora</p>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div class="modal-overlay" id="settings-modal">
+    <div class="modal-content glass-3d" style="max-height:80vh;overflow-y:auto;">
+      <h2 style="margin-bottom:25px;font-size:22px;font-weight:800;">⚙️ Ajustes</h2>
+      <div style="margin-bottom:15px;text-align:left;">
+        <label style="font-size:14px;font-weight:700;color:var(--text-muted);">Dificultad</label>
+        <select id="difficulty-select" onchange="setDifficulty(this.value)"
+          style="width:100%;padding:12px;border-radius:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;font-size:15px;margin-top:8px;">
+          <option value="easy">Fácil (25s, menos opciones)</option>
+          <option value="medium" selected>Medio (15s)</option>
+          <option value="hard">Difícil (10s, más opciones)</option>
+        </select>
+      </div>
+      <button class="btn" style="margin-bottom:10px;" onclick="showLeaderboard()">🏅 Tabla de Clasificación</button>
+      <button class="btn" style="margin-bottom:10px;" onclick="startFlashcards()">🃏 Flashcards</button>
+      <button class="btn"
+        style="margin-bottom:10px;background:linear-gradient(135deg,rgba(191,90,242,0.2),rgba(10,132,255,0.2));border-color:rgba(191,90,242,0.4);color:#bf5af2;"
+        onclick="openAnalytics();closeSettings();">📊 Análisis y Métricas</button>
+      <button class="btn" style="margin-bottom:10px;" onclick="switchScreen('mode');closeSettings();">🎮 Cambiar
+        Modo</button>
+      <button class="btn btn-primary" style="margin-bottom:10px;" onclick="closeSettings()">Volver</button>
+      <button class="btn"
+        style="background:rgba(255,159,10,0.15);border-color:rgba(255,159,10,0.3);color:var(--warning);margin-bottom:10px;"
+        onclick="resetProgress()">🔄 Reiniciar Progreso</button>
+      <button class="btn" style="background:rgba(255,69,58,0.15);border-color:rgba(255,69,58,0.3);color:var(--error);"
+        onclick="logout()">🚪 Cerrar Sesión</button>
+      <p style="font-size:11px;color:var(--text-muted);margin-top:15px;cursor:pointer;" ondblclick="showAdmin()">v2.0
+        EDUCA</p>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD MODAL -->
+  <div class="modal-overlay" id="leaderboard-modal">
+    <div class="modal-content glass-3d">
+      <h2 style="margin-bottom:25px;font-size:22px;font-weight:800;">🏅 Top 5</h2>
+      <div id="leaderboard-list"></div>
+      <button class="btn btn-primary" style="margin-top:20px;"
+        onclick="document.getElementById('leaderboard-modal').classList.remove('active')">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- ADMIN MODAL -->
+  <div class="modal-overlay" id="admin-modal">
+    <div class="modal-content glass-3d" style="max-width:500px;max-height:80vh;overflow-y:auto;">
+      <h2 style="margin-bottom:25px;font-size:22px;font-weight:800;">📊 Panel Admin</h2>
+      <div id="admin-content"></div>
+      <button class="btn btn-primary" style="margin-top:20px;"
+        onclick="document.getElementById('admin-modal').classList.remove('active')">Cerrar</button>
+    </div>
+  </div>
+
+  <script src="educa-data.js"></script>
+  <script>
+    // --- STATE ---
+    let currentUser = null;
+    let userData = { answers: {}, currentStreak: 0, maxStreak: 0 };
+    let currentLevelIndex = 0;
+    let currentQuestionIndex = 0;
+    let isQuestionAnswered = false;
+    let lastScreen = 'home';
+
+    const TIPS = [
+      "El mantenimiento preventivo evita hasta el 80% de los fallos de hardware.",
+      "Siempre desconecta la PC de la corriente antes de manipular el interior.",
+      "Un SSD es hasta 10 veces más rápido que un Disco Duro mecánico antiguo.",
+      "La pasta térmica se debe cambiar al menos una vez al año para evitar sobrecalentamiento.",
+      "Los cuellos de botella ocurren cuando el procesador no es tan rápido como la tarjeta de video.",
+      "Windows Defender actualmente es suficiente protección para un usuario doméstico."
+    ];
+
+    // --- DOM ---
+    const screens = {
+      home: document.getElementById('home-screen'),
+      info: document.getElementById('info-screen'),
+      path: document.getElementById('path-screen'),
+      quiz: document.getElementById('quiz-screen'),
+      analytics: document.getElementById('analytics-screen')
+    };
+
+    function switchScreen(screenName) {
+      if (screenName !== 'info' && screenName !== 'settings-modal') {
+        lastScreen = screenName;
+      }
+      Object.values(screens).forEach(s => s.classList.add('hidden'));
+      screens[screenName].classList.remove('hidden');
+      window.scrollTo(0, 0);
+    }
+
+    function goBackFromInfo() {
+      switchScreen(lastScreen);
+    }
+
+    // --- CLOCK ---
+    function updateClocks() {
+      const now = new Date();
+      let h = now.getHours();
+      let m = now.getMinutes();
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12; h = h ? h : 12;
+      m = m < 10 ? '0' + m : m;
+      const timeStr = `${h}:${m} ${ampm}`;
+      document.querySelectorAll('.water-clock').forEach(el => el.textContent = timeStr);
+    }
+    setInterval(updateClocks, 1000);
+    updateClocks();
+
+    function openSettings() { document.getElementById('settings-modal').classList.add('active'); }
+    function closeSettings() { document.getElementById('settings-modal').classList.remove('active'); }
+
+    // --- LOGIN ---
+    document.getElementById('btn-start').addEventListener('click', () => {
+      const name = document.getElementById('username-input').value.trim();
+      if (!name) { alert("Por favor ingresa tu nombre."); return; }
+
+      currentUser = name;
+      document.getElementById('user-display').textContent = name;
+
+      const savedUsers = JSON.parse(localStorage.getItem('educa_users') || '{}');
+      if (savedUsers[name]) {
+        userData = savedUsers[name];
+        if (userData.currentStreak === undefined) userData.currentStreak = 0;
+        if (userData.maxStreak === undefined) userData.maxStreak = 0;
+      } else {
+        savedUsers[name] = { answers: {}, currentStreak: 0, maxStreak: 0 };
+        userData = savedUsers[name];
+        localStorage.setItem('educa_users', JSON.stringify(savedUsers));
+      }
+
+      // Update Tip
+      const randTip = TIPS[Math.floor(Math.random() * TIPS.length)];
+      document.getElementById('learning-tip').innerHTML = `<div style="font-size: 24px;">💡</div><div><strong>Sabías que...</strong> ${randTip}</div>`;
+
+      renderLevels();
+      switchScreen('path');
+    });
+
+    function logout() {
+      currentUser = null;
+      document.getElementById('username-input').value = '';
+      closeSettings();
+      switchScreen('home');
+    }
+
+    function saveProgress() {
+      const savedUsers = JSON.parse(localStorage.getItem('educa_users') || '{}');
+      savedUsers[currentUser] = userData;
+      localStorage.setItem('educa_users', JSON.stringify(savedUsers));
+    }
+
+    // --- RENDERING LEVELS & STATS ---
+    function renderLevels() {
+      const container = document.getElementById('levels-container');
+      container.innerHTML = '';
+
+      let unlockNext = true;
+      let totalCorrect = 0;
+      let totalWrong = 0;
+      let errorsByLevel = {};
+
+      educaData.levels.forEach((level, index) => {
+        let levelWrong = 0;
+
+        const totalQ = level.questions.length;
+        const answeredQ = level.questions.filter(q => {
+          const ans = userData.answers[q.id];
+          if (ans === 'correct') totalCorrect++;
+          if (ans === 'wrong') { totalWrong++; levelWrong++; }
+          return ans;
+        }).length;
+
+        errorsByLevel[level.title] = levelWrong;
+
+        const isCompleted = answeredQ === totalQ;
+
+        if (unlockNext) {
+          const card = document.createElement('div');
+          card.className = 'level-card glass-3d';
+          if (isCompleted) card.style.borderColor = 'rgba(50,215,75,0.4)';
+
+          card.innerHTML = `
+            <div class="level-icon">${level.icon}</div>
+            <div class="level-info" style="flex:1;">
+              <h3>${level.title}</h3>
+              <p style="color:var(--text-muted); font-size:14px; font-weight:600;">${answeredQ} / ${totalQ} completadas</p>
+            </div>
+            <div style="font-size:24px;">
+              ${isCompleted ? '✅' : '▶'}
+            </div>
+          `;
+
+          card.onclick = () => startLevel(index);
+          container.appendChild(card);
+        }
+
+        unlockNext = isCompleted;
+      });
+
+      if (unlockNext && educaData.levels.length > 0) {
+        const fin = document.createElement('div');
+        fin.className = 'glass-3d';
+        fin.style.padding = "25px"; fin.style.textAlign = "center";
+        fin.innerHTML = `<h3 style="color:var(--success); font-size:20px; font-weight:800;">¡Has completado toda la ruta!</h3>`;
+        container.appendChild(fin);
+      }
+
+      // METRICS
+      const statsContainer = document.getElementById('stats-container');
+      const totalAnswers = totalCorrect + totalWrong;
+
+      if (totalAnswers > 0) {
+        statsContainer.classList.remove('hidden');
+        document.getElementById('stat-racha').textContent = userData.currentStreak || 0;
+        document.getElementById('stat-max-racha').textContent = userData.maxStreak || 0;
+        document.getElementById('stat-correct').textContent = totalCorrect;
+        document.getElementById('stat-wrong').textContent = totalWrong;
+
+        let maxErrors = 0;
+        let worstLevel = "";
+        for (let lvl in errorsByLevel) {
+          if (errorsByLevel[lvl] > maxErrors) {
+            maxErrors = errorsByLevel[lvl];
+            worstLevel = lvl;
+          }
+        }
+
+        const warnSec = document.getElementById('warning-section');
+        if (totalWrong === 0) {
+          warnSec.innerHTML = `<div class="warning-box" style="background: rgba(50,215,75,0.1); border-color: rgba(50,215,75,0.3);"><div style="font-size: 24px;">🏆</div><div><strong style="color:var(--success);">¡Impecable!</strong><br>No tienes errores. Un diagnóstico perfecto.</div></div>`;
+        } else {
+          warnSec.innerHTML = `<div class="warning-box"><div style="font-size: 24px;">⚠️</div><div><strong style="color:var(--warning);">Área a Repasar</strong><br>Tienes más dificultades en <strong>${worstLevel}</strong> con ${maxErrors} errores. Lee cuidadosamente las explicaciones.</div></div>`;
+        }
+      } else {
+        statsContainer.classList.add('hidden');
+      }
+    }
+
+    // --- QUIZ LOGIC ---
+    function updateStreakBadge() {
+      const badge = document.getElementById('quiz-streak');
+      if (userData.currentStreak > 0) {
+        badge.classList.remove('hidden');
+        badge.innerHTML = `🔥 Racha: ${userData.currentStreak}`;
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
+    function startLevel(lvlIndex) {
+      currentLevelIndex = lvlIndex;
+      const level = educaData.levels[lvlIndex];
+      let firstUnanswered = 0;
+      for (let i = 0; i < level.questions.length; i++) {
+        if (!userData.answers[level.questions[i].id]) {
+          firstUnanswered = i;
+          break;
+        }
+      }
+      currentQuestionIndex = firstUnanswered;
+
+      document.getElementById('quiz-level-title').textContent = level.title;
+      renderQuestion();
+      switchScreen('quiz');
+    }
+
+    function goBackToPath() {
+      renderLevels();
+      switchScreen('path');
+    }
+
+    function renderQuestion() {
+      const level = educaData.levels[currentLevelIndex];
+      if (currentQuestionIndex >= level.questions.length) {
+        goBackToPath();
+        return;
+      }
+
+      const q = level.questions[currentQuestionIndex];
+      isQuestionAnswered = false;
+
+      updateStreakBadge();
+
+      document.getElementById('quiz-progress').textContent = `${currentQuestionIndex + 1} / ${level.questions.length}`;
+      document.getElementById('q-problem').textContent = q.problem;
+      document.getElementById('q-title').textContent = q.q;
+
+      const optionsContainer = document.getElementById('q-options');
+      optionsContainer.innerHTML = '';
+
+      q.options.forEach((optText, optIndex) => {
+        const btn = document.createElement('button');
+        btn.className = 'btn option-btn';
+        btn.textContent = optText;
+        btn.onclick = () => handleAnswer(optIndex, q.correct, q.id);
+        optionsContainer.appendChild(btn);
+      });
+
+      document.getElementById('q-explanation').style.display = 'none';
+      document.getElementById('btn-next-question').classList.add('hidden');
+    }
+
+    function handleAnswer(selectedIndex, correctIndex, questionId) {
+      if (isQuestionAnswered) return;
+      isQuestionAnswered = true;
+
+      const isCorrect = (selectedIndex === correctIndex);
+      userData.answers[questionId] = isCorrect ? 'correct' : 'wrong';
+
+      if (isCorrect) {
+        userData.currentStreak++;
+        if (userData.currentStreak > userData.maxStreak) {
+          userData.maxStreak = userData.currentStreak;
+        }
+      } else {
+        userData.currentStreak = 0;
+      }
+
+      saveProgress();
+      updateStreakBadge();
+
+      const btns = document.querySelectorAll('.option-btn');
+      btns.forEach((btn, i) => {
+        if (i === correctIndex) btn.classList.add('correct');
+        else if (i === selectedIndex && !isCorrect) btn.classList.add('wrong');
+        else btn.style.opacity = '0.3';
+      });
+
+      const exp = document.getElementById('q-explanation');
+      exp.innerHTML = `<strong style="font-size:18px; color:${isCorrect ? 'var(--success)' : 'var(--error)'};">${isCorrect ? '¡Correcto!' : 'Oh no, racha perdida.'}</strong><br><br>${educaData.levels[currentLevelIndex].questions[currentQuestionIndex].example}`;
+      exp.style.display = 'block';
+
+      document.getElementById('btn-next-question').classList.remove('hidden');
+    }
+
+    function nextQuestion() {
+      currentQuestionIndex++;
+      renderQuestion();
+    }
+
+    // ===== ANALYTICS =====
+    let barChartInstance = null;
+    let radarChartInstance = null;
+
+    function getAnalyticsData() {
+      let totalCorrect = 0, totalWrong = 0, totalQuestions = 0;
+      const levelStats = [];
+      educaData.levels.forEach(level => {
+        let c = 0, w = 0;
+        level.questions.forEach(q => {
+          totalQuestions++;
+          const a = userData.answers[q.id];
+          if (a === 'correct') { c++; totalCorrect++; }
+          if (a === 'wrong') { w++; totalWrong++; }
+        });
+        const total = level.questions.length;
+        const answered = c + w;
+        const pct = answered > 0 ? Math.round((c / answered) * 100) : 0;
+        levelStats.push({
+          title: level.title, icon: level.icon, correct: c, wrong: w, total, answered, pct,
+          wrongQuestions: level.questions.filter(q => userData.answers[q.id] === 'wrong')
+        });
+      });
+      const totalAnswered = totalCorrect + totalWrong;
+      const globalPct = totalAnswered > 0 ? Math.round((totalCorrect / totalAnswered) * 100) : 0;
+      const progressPct = Math.round((totalAnswered / totalQuestions) * 100);
+      return { totalCorrect, totalWrong, totalQuestions, totalAnswered, globalPct, progressPct, levelStats };
+    }
+
+    function openAnalytics() {
+      renderAnalytics();
+      switchScreen('analytics');
+    }
+
+    function renderAnalytics() {
+      const d = getAnalyticsData();
+      // TOP METRICS
+      const metricsEl = document.getElementById('analytics-top-metrics');
+      const metrics = [
+        { icon: '✅', value: d.totalCorrect, label: 'Aciertos', color: '#32d74b', pct: d.globalPct },
+        { icon: '❌', value: d.totalWrong, label: 'Errores', color: '#ff453a', pct: d.totalAnswered > 0 ? Math.round((d.totalWrong / d.totalAnswered) * 100) : 0 },
+        { icon: '🔥', value: userData.maxStreak || 0, label: 'Mejor Racha', color: '#ff9f0a', pct: Math.min(100, (userData.maxStreak || 0) * 10) },
+        { icon: '📝', value: d.totalAnswered + '/' + d.totalQuestions, label: 'Progreso', color: '#0a84ff', pct: d.progressPct }
+      ];
+      metricsEl.innerHTML = metrics.map(m => `
+        <div class="metric-card glass-3d">
+          <div class="metric-icon">${m.icon}</div>
+          <div class="metric-value" style="color:${m.color}">${m.value}</div>
+          <div class="metric-label">${m.label}</div>
+          <div class="metric-bar"><div class="metric-bar-fill" style="width:${m.pct}%;background:${m.color}"></div></div>
+        </div>
+      `).join('');
+
+      // RADIAL PROGRESS
+      const radialEl = document.getElementById('radial-container');
+      const R = 36, C = 2 * Math.PI * R;
+      const radials = [
+        { label: 'Precisión', val: d.globalPct + '%', pct: d.globalPct, color: '#32d74b' },
+        { label: 'Progreso', val: d.progressPct + '%', pct: d.progressPct, color: '#0a84ff' },
+        { label: 'Racha', val: userData.maxStreak || 0, pct: Math.min(100, (userData.maxStreak || 0) * 10), color: '#ff9f0a' }
+      ];
+      radialEl.innerHTML = radials.map(r => {
+        const offset = C - (C * r.pct / 100);
+        return `<div class="radial-item"><svg viewBox="0 0 80 80"><circle class="radial-bg" cx="40" cy="40" r="${R}"/><circle class="radial-fg" cx="40" cy="40" r="${R}" stroke="${r.color}" stroke-dasharray="${C}" stroke-dashoffset="${offset}"/></svg><div class="radial-val" style="color:${r.color};margin-top:-5px;">${r.val}</div><div class="radial-label">${r.label}</div></div>`;
+      }).join('');
+
+      // LEVEL BREAKDOWN
+      const breakdownEl = document.getElementById('level-breakdown');
+      breakdownEl.innerHTML = d.levelStats.map(lv => {
+        const barColor = lv.pct >= 80 ? '#32d74b' : lv.pct >= 50 ? '#ff9f0a' : '#ff453a';
+        const status = lv.answered === 0 ? 'Sin iniciar' : lv.answered < lv.total ? `${lv.answered}/${lv.total} respondidas` : (lv.pct >= 80 ? '¡Dominado!' : 'Necesita repaso');
+        return `<div class="level-row"><div class="lv-icon">${lv.icon}</div><div class="lv-info"><div class="lv-name">${lv.title}</div><div class="lv-bar"><div class="lv-bar-fill" style="width:${lv.pct}%;background:${barColor}"></div></div><div class="lv-status">${status} — ${lv.correct}✅ ${lv.wrong}❌</div></div><div class="lv-pct" style="color:${barColor}">${lv.pct}%</div></div>`;
+      }).join('');
+
+      // BAR CHART
+      const barCtx = document.getElementById('levelBarChart').getContext('2d');
+      if (barChartInstance) barChartInstance.destroy();
+      barChartInstance = new Chart(barCtx, {
+        type: 'bar',
+        data: {
+          labels: d.levelStats.map(l => l.title.replace('Falla de ', '').replace('Tarjeta Madre y ', 'M. y ')),
+          datasets: [
+            { label: 'Aciertos', data: d.levelStats.map(l => l.correct), backgroundColor: 'rgba(50,215,75,0.7)', borderRadius: 6 },
+            { label: 'Errores', data: d.levelStats.map(l => l.wrong), backgroundColor: 'rgba(255,69,58,0.7)', borderRadius: 6 }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          scales: {
+            x: { ticks: { color: '#98989d', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { beginAtZero: true, ticks: { color: '#98989d', stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' } }
+          },
+          plugins: { legend: { labels: { color: '#fff', font: { family: 'Inter', weight: '600' } } } }
+        }
+      });
+
+      // RADAR CHART
+      const radarCtx = document.getElementById('skillRadarChart').getContext('2d');
+      if (radarChartInstance) radarChartInstance.destroy();
+      radarChartInstance = new Chart(radarCtx, {
+        type: 'radar',
+        data: {
+          labels: d.levelStats.map(l => l.title.replace('Falla de ', '').replace('Tarjeta Madre y ', 'M. y ')),
+          datasets: [{
+            label: 'Dominio %',
+            data: d.levelStats.map(l => l.pct),
+            backgroundColor: 'rgba(10,132,255,0.2)',
+            borderColor: '#0a84ff',
+            pointBackgroundColor: d.levelStats.map(l => l.pct >= 80 ? '#32d74b' : l.pct >= 50 ? '#ff9f0a' : '#ff453a'),
+            pointRadius: 5, borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          scales: { r: { min: 0, max: 100, ticks: { stepSize: 25, color: '#98989d', backdropColor: 'transparent' }, grid: { color: 'rgba(255,255,255,0.08)' }, pointLabels: { color: '#fff', font: { size: 11, family: 'Inter', weight: '600' } } } },
+          plugins: { legend: { labels: { color: '#fff', font: { family: 'Inter' } } } }
+        }
+      });
+
+      // IMPROVEMENT LIST
+      const impEl = document.getElementById('improvement-list');
+      const sorted = [...d.levelStats].sort((a, b) => a.pct - b.pct);
+      let impHTML = '';
+      sorted.forEach(lv => {
+        if (lv.answered === 0) {
+          impHTML += `<li class="improvement-item"><div class="imp-icon">📌</div><div><div class="imp-title">${lv.title}</div><div class="imp-desc">Aún no has comenzado este nivel. ¡Empieza para evaluar tu conocimiento!</div></div></li>`;
+        } else if (lv.pct < 60) {
+          const tips = lv.wrongQuestions.slice(0, 2).map(q => q.q).join(' / ');
+          impHTML += `<li class="improvement-item"><div class="imp-icon">⚠️</div><div><div class="imp-title">${lv.title} — ${lv.pct}% de aciertos</div><div class="imp-desc">Necesitas repasar este tema. Fallaste en: ${tips || 'varias preguntas'}. Revisa las explicaciones.</div></div></li>`;
+        } else if (lv.pct < 80) {
+          impHTML += `<li class="improvement-item" style="background:rgba(255,159,10,0.06);border-color:rgba(255,159,10,0.15)"><div class="imp-icon">💡</div><div><div class="imp-title">${lv.title} — ${lv.pct}%</div><div class="imp-desc">Vas bien, pero puedes mejorar. Repasa las preguntas que fallaste para alcanzar la excelencia.</div></div></li>`;
+        } else {
+          impHTML += `<li class="improvement-item good"><div class="imp-icon">🏆</div><div><div class="imp-title">${lv.title} — ${lv.pct}%</div><div class="imp-desc">¡Excelente dominio! Sigue así.</div></div></li>`;
+        }
+      });
+      impEl.innerHTML = impHTML;
+    }
+
+    // ===== PDF GENERATION =====
+    function downloadPDF() {
+      if (!window.jspdf) { alert('Cargando librería PDF, espera un momento e intenta de nuevo.'); return; }
+      try {
+        const d = getAnalyticsData();
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const W = 210, M = 20;
+        let y = 20;
+
+        // Header
+        doc.setFillColor(10, 10, 15);
+        doc.rect(0, 0, W, 50, 'F');
+        doc.setFillColor(10, 132, 255);
+        doc.rect(0, 48, W, 3, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(28);
+        doc.setFont('helvetica', 'bold');
+        doc.text('EDUCA', M, 30);
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Reporte de Rendimiento', M, 38);
+        doc.setFontSize(10);
+        doc.text(currentUser || 'Usuario', W - M, 30, { align: 'right' });
+        doc.text(new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' }), W - M, 38, { align: 'right' });
+        y = 62;
+
+        // Summary boxes
+        doc.setTextColor(60, 60, 60);
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Resumen General', M, y); y += 10;
+        const boxW = (W - 2 * M - 15) / 4;
+        const boxes = [
+          { label: 'Aciertos', val: d.totalCorrect, c: [50, 215, 75] },
+          { label: 'Errores', val: d.totalWrong, c: [255, 69, 58] },
+          { label: 'Precision', val: d.globalPct + '%', c: [10, 132, 255] },
+          { label: 'Racha Max', val: userData.maxStreak || 0, c: [255, 159, 10] }
+        ];
+        boxes.forEach((b, i) => {
+          const bx = M + i * (boxW + 5);
+          doc.setFillColor(245, 245, 250);
+          doc.roundedRect(bx, y, boxW, 28, 3, 3, 'F');
+          doc.setTextColor(b.c[0], b.c[1], b.c[2]);
+          doc.setFontSize(18);
+          doc.setFont('helvetica', 'bold');
+          doc.text(String(b.val), bx + boxW / 2, y + 14, { align: 'center' });
+          doc.setTextColor(120, 120, 130);
+          doc.setFontSize(8);
+          doc.setFont('helvetica', 'normal');
+          doc.text(b.label, bx + boxW / 2, y + 22, { align: 'center' });
+        });
+        y += 38;
+
+        // Progress bar
+        doc.setTextColor(60, 60, 60);
+        doc.setFontSize(10);
+        doc.text('Progreso total: ' + d.progressPct + '%', M, y); y += 5;
+        doc.setFillColor(230, 230, 235);
+        doc.roundedRect(M, y, W - 2 * M, 5, 2, 2, 'F');
+        doc.setFillColor(10, 132, 255);
+        const progW = Math.max(1, (W - 2 * M) * d.progressPct / 100);
+        if (d.progressPct > 0) doc.roundedRect(M, y, progW, 5, 2, 2, 'F');
+        y += 15;
+
+        // Level breakdown
+        doc.setTextColor(60, 60, 60);
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Rendimiento por Nivel', M, y); y += 10;
+        d.levelStats.forEach(lv => {
+          if (y > 260) { doc.addPage(); y = 20; }
+          const barColor = lv.pct >= 80 ? [50, 215, 75] : lv.pct >= 50 ? [255, 159, 10] : [255, 69, 58];
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(40, 40, 45);
+          doc.text(lv.title, M, y);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(10);
+          doc.setTextColor(barColor[0], barColor[1], barColor[2]);
+          doc.text(lv.pct + '%', W - M, y, { align: 'right' });
+          y += 5;
+          doc.setFillColor(230, 230, 235);
+          doc.roundedRect(M, y, W - 2 * M, 4, 2, 2, 'F');
+          doc.setFillColor(barColor[0], barColor[1], barColor[2]);
+          doc.roundedRect(M, y, Math.max(1, (W - 2 * M) * lv.pct / 100), 4, 2, 2, 'F');
+          y += 5;
+          doc.setFontSize(8);
+          doc.setTextColor(120, 120, 130);
+          doc.text(lv.correct + ' aciertos, ' + lv.wrong + ' errores de ' + lv.total + ' preguntas', M, y + 3);
+          y += 12;
+        });
+        y += 5;
+
+        // AREAS DE MEJORA
+        if (y > 220) { doc.addPage(); y = 20; }
+        doc.setFillColor(255, 248, 245);
+        doc.roundedRect(M - 2, y - 5, W - 2 * M + 4, 12, 3, 3, 'F');
+        doc.setTextColor(255, 69, 58);
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Areas donde debes Mejorar', M, y + 3); y += 15;
+
+        const sorted = [...d.levelStats].sort((a, b) => a.pct - b.pct);
+        sorted.forEach(lv => {
+          if (y > 265) { doc.addPage(); y = 20; }
+          if (lv.answered === 0) {
+            doc.setFillColor(245, 245, 250);
+            doc.roundedRect(M, y - 4, W - 2 * M, 20, 2, 2, 'F');
+            doc.setTextColor(10, 132, 255);
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            doc.text(lv.title + ' — Sin iniciar', M + 5, y + 3);
+            doc.setTextColor(100, 100, 110);
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Comienza este nivel para evaluar tu conocimiento.', M + 5, y + 11);
+            y += 25;
+          } else if (lv.pct < 80) {
+            const bgC = lv.pct < 60 ? [255, 240, 240] : [255, 250, 240];
+            doc.setFillColor(bgC[0], bgC[1], bgC[2]);
+            const wrongNames = lv.wrongQuestions.map(q => q.q).slice(0, 2);
+            const blockH = 22 + wrongNames.length * 6;
+            doc.roundedRect(M, y - 4, W - 2 * M, blockH, 2, 2, 'F');
+            doc.setTextColor(lv.pct < 60 ? 200 : 180, lv.pct < 60 ? 50 : 120, lv.pct < 60 ? 40 : 10);
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            doc.text((lv.pct < 60 ? '!! ' : '! ') + lv.title + ' — ' + lv.pct + '% de aciertos', M + 5, y + 3);
+            doc.setTextColor(100, 100, 110);
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            const rec = lv.pct < 60 ? 'Necesitas repasar urgentemente este tema.' : 'Buen avance, pero repasa lo que fallaste.';
+            doc.text(rec, M + 5, y + 11);
+            wrongNames.forEach((qn, qi) => {
+              const txt = '- ' + (qn.length > 70 ? qn.substring(0, 70) + '...' : qn);
+              doc.text(txt, M + 8, y + 18 + qi * 6);
+            });
+            y += blockH + 5;
+          } else {
+            doc.setFillColor(240, 255, 245);
+            doc.roundedRect(M, y - 4, W - 2 * M, 16, 2, 2, 'F');
+            doc.setTextColor(30, 160, 60);
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            doc.text('OK ' + lv.title + ' — ' + lv.pct + '% Dominado', M + 5, y + 5);
+            y += 22;
+          }
+        });
+
+        // Footer
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let p = 1; p <= pageCount; p++) {
+          doc.setPage(p);
+          doc.setFillColor(240, 240, 245);
+          doc.rect(0, 287, W, 10, 'F');
+          doc.setTextColor(150, 150, 160);
+          doc.setFontSize(8);
+          doc.setFont('helvetica', 'normal');
+          doc.text('EDUCA — Reporte generado automaticamente | Pagina ' + p + '/' + pageCount, W / 2, 293, { align: 'center' });
+        }
+
+        doc.save('EDUCA_Reporte_' + (currentUser || 'usuario') + '.pdf');
+      } catch (e) { console.error('Error generando PDF:', e); alert('Error al generar el PDF. Verifica tu conexión a internet.'); }
+    }
+
+  </script>
+</body>
+
+</html>
